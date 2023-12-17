@@ -22,3 +22,7 @@
 #container a {
   text-decoration: none;
 }
+
+.spriteSize {
+  width: 120px;
+}

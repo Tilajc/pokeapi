@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import './PokemonList.css';
+import { IonCard, IonCardContent, IonCardHeader, IonGrid, IonRow, IonCol, } from '@ionic/react';
 
 interface Ability {
   pokemon_v2_ability: {
@@ -32,7 +33,7 @@ const PokemonList: React.FC<ContainerProps> = () => {
           },
           body: JSON.stringify({
             query: `query MyQuery {
-              pokemon_v2_pokemon(where: {name: {_eq: "bulbasaur"}}) {
+              pokemon_v2_pokemon {
                 id
                 name
                 height
@@ -62,7 +63,15 @@ const PokemonList: React.FC<ContainerProps> = () => {
           throw new Error(data.errors[0].message);
         }
 
-        setPokemons(data.data.pokemon_v2_pokemon);
+        const shuffledPokemons = [...data.data.pokemon_v2_pokemon];
+        for(let i=shuffledPokemons.length - 1; i>0; i-- ){
+          const j=Math.floor(Math.random() * (i + 1))
+          const aux = shuffledPokemons[i]
+          shuffledPokemons[i] = shuffledPokemons[j]
+          shuffledPokemons[j] = aux
+        }
+        setPokemons(shuffledPokemons);
+
       } catch (error) {
         console.error('Error fetching Pokemon data:', error);
       }
@@ -74,17 +83,27 @@ const PokemonList: React.FC<ContainerProps> = () => {
 
   return (
     <div id="container">
-      {pokemons.map((pokemon) => (
-        <div key={pokemon.id}>
-          <h2>{pokemon.name}</h2>
-          <img src={JSON.parse(pokemon.pokemon_v2_pokemonsprites[0].sprites).front_default} alt="" />
-          <p>ID: {pokemon.id}</p>
-          <p>Height: {pokemon.height}</p>
-          <p>Weight: {pokemon.weight}</p>
-          <p>BaseXP: {pokemon.base_experience}</p>
-          <p>Abilities: {pokemon.pokemon_v2_pokemonabilities.map((ability) => ability.pokemon_v2_ability.name).join(', ')}</p>
-        </div>
-      ))}
+      <IonGrid>
+        <IonRow>
+          {pokemons.map((pokemon) => (
+            <IonCol size='4'>
+                <IonCard key={pokemon.id}>
+                  <IonCardHeader>
+                    <h2>{pokemon.name}</h2>
+                  </IonCardHeader>
+                  <IonCardContent>
+                    <img src={JSON.parse(pokemon.pokemon_v2_pokemonsprites[0].sprites).front_default} alt="pokemon-sprite" className='spriteSize' />
+                    <p>ID: {pokemon.id}</p>
+                    <p>Height: {pokemon.height}</p>
+                    <p>Weight: {pokemon.weight}</p>
+                    <p>BaseXP: {pokemon.base_experience}</p>
+                    <p>Abilities: {pokemon.pokemon_v2_pokemonabilities.map((ability) => ability.pokemon_v2_ability.name).join(', ')}</p>
+                  </IonCardContent>
+              </IonCard>
+            </IonCol>
+          ))}
+        </IonRow>
+      </IonGrid>
     </div>
   );
 };
