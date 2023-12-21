@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './PokemonList.css';
-import { IonCard, IonCardContent, IonCardHeader, IonGrid, IonRow, IonCol, } from '@ionic/react';
+import { IonCard, IonCardContent, IonCardHeader, IonGrid, IonRow, IonCol, IonInfiniteScroll, IonInfiniteScrollContent, IonContent} from '@ionic/react';
 
 interface Ability {
   pokemon_v2_ability: {
@@ -23,9 +23,9 @@ interface ContainerProps {}
 const PokemonList: React.FC<ContainerProps> = () => {
   const [pokemons, setPokemons] = useState<Pokemon[]>([]);
   const [isCharging, setIsCharging] = useState<Boolean>(false);
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [items, setItems] = useState<Pokemon[]>([]);
 
-  const fetchData = async () => {
+  const fetchPokemons = async () => {
     setIsCharging(true)
     try {
       const response = await fetch('https://beta.pokeapi.co/graphql/v1beta', {
@@ -76,35 +76,37 @@ const PokemonList: React.FC<ContainerProps> = () => {
     } catch (error) {
       console.error('Error fetching Pokemon data:', error);
     }
-
     setIsCharging(false);
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const handleScroll = () => {
-    const container = containerRef.current;
-    if (container) {
-      const { scrollTop, clientHeight, scrollHeight } = container;
-      if (scrollTop + clientHeight >= scrollHeight - 20) {
-        setIsCharging(true);
-      }
+  const generateItems = () => {
+    const newItems = [];
+    for (let i = 0; i < 30; i++) {
+      newItems.push(pokemons[items.length + i]);
     }
+    setItems([...items, ...newItems]);
   };
 
+  useEffect(() => {
+      fetchPokemons();
+  }, []);
+
+  useEffect(() => {
+    if (pokemons.length > 0) {
+      generateItems();
+    }
+  }, [pokemons]);
 
   return (
-    <div id="container">
+    <IonContent id="container">
       {isCharging ? (
         <div id='modal'>
           <img src='/pokeball.png' alt="loading" />
         </div>
       ) : (
         <IonGrid>
-        <IonRow>
-          {pokemons && pokemons.map((pokemon) => (
+          <IonRow>
+          {items && items.map((pokemon) => (
             <IonCol key={pokemon.id} size='4'>
                 <IonCard id='pokemonCard'>
                   <IonCardHeader>
@@ -122,11 +124,18 @@ const PokemonList: React.FC<ContainerProps> = () => {
             </IonCol>
           ))}
         </IonRow>
+        <IonInfiniteScroll
+          onIonInfinite={(ev) => {
+            generateItems();
+            setTimeout(() => ev.target.complete(), 500);
+          }}
+        >
+          <IonInfiniteScrollContent></IonInfiniteScrollContent>
+        </IonInfiniteScroll>
       </IonGrid>
       )}
-    </div>
+    </IonContent>
   );
-  ;
 };
 
 export default PokemonList;
