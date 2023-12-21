@@ -107,18 +107,18 @@ const PokemonList: React.FC<ContainerProps> = () => {
         <IonGrid>
           <IonRow>
           {items && items.map((pokemon) => (
-            <IonCol key={pokemon.id} size='4'>
-                <IonCard id='pokemonCard'>
+            <IonCol key={pokemon.id} size-md="4" size-sm="6" size-xs="12">
+                <IonCard id='pokemonCard' className='ion-text-center'>
                   <IonCardHeader>
-                    <h2>{pokemon.name}</h2>
+                  <h2>{pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}</h2>
                   </IonCardHeader>
-                  <IonCardContent>
-                    <img src={JSON.parse(pokemon.pokemon_v2_pokemonsprites[0].sprites).front_default} alt="pokemon-sprite" className='spriteSize' />
+                  <IonCardContent >
+                    {JSON.parse(pokemon.pokemon_v2_pokemonsprites[0].sprites).front_default ? <img src={JSON.parse(pokemon.pokemon_v2_pokemonsprites[0].sprites).front_default} alt="pokemon-sprite" className='spriteSize' /> : <img src='/pokeball.png' alt='pokeballimg' className='spriteSize'/>}
                     <p>ID: {pokemon.id}</p>
-                    <p>Height: {pokemon.height}</p>
-                    <p>Weight: {pokemon.weight}</p>
+                    <p>Height: {pokemon.height / 10} m</p>
+                    <p>Weight: {pokemon.weight / 10} kg</p>
                     <p>BaseXP: {pokemon.base_experience}</p>
-                    <p>Abilities: {pokemon.pokemon_v2_pokemonabilities.map((ability) => ability.pokemon_v2_ability.name).join(', ')}</p>
+                    <p>Abilities: {pokemon.pokemon_v2_pokemonabilities.map((ability) => ability.pokemon_v2_ability.name.charAt(0).toUpperCase() + ability.pokemon_v2_ability.name.slice(1)).join(', ')}</p>
                   </IonCardContent>
               </IonCard>
             </IonCol>
